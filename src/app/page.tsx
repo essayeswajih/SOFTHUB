@@ -21,6 +21,7 @@ import {
   Twitter,
   CheckCircle,
 } from "lucide-react"
+import { SoftHubLogo } from "@/components/ui/logo"
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -913,9 +914,7 @@ export default function Portfolio() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
-                <Code className="w-5 h-5 text-white" />
-              </div>
+              <SoftHubLogo size={32} className="w-8 h-8" />
               <span className="text-2xl font-bold text-white">SoftHub</span>
             </div>
             <div className="hidden md:flex space-x-8">
