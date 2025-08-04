@@ -1213,7 +1213,7 @@ export default function Portfolio() {
               <p className="text-white/80 text-lg mb-6">
                 We are a team of passionate developers and cybersecurity experts dedicated to creating secure,
                 innovative digital solutions. With years of experience in the industry, we understand the critical
-                importance of both functionality and security in today's digital landscape.
+                importance of both functionality and security in today&apos;s digital landscape.
               </p>
               <p className="text-white/80 text-lg mb-8">
                 Our mission is to help businesses thrive in the digital age by providing robust, scalable, and secure
@@ -1266,7 +1266,7 @@ export default function Portfolio() {
       <section id="contact" className="py-20 px-6 bg-black/20" ref={contactRef}>
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Let's Work Together</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Let&apos;s Work Together</h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Ready to secure and scale your digital presence? Get in touch with us today.
             </p>
