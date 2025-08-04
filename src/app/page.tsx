@@ -723,23 +723,23 @@ export default function Portfolio() {
 
   const projects = [
     {
-      title: "Log Analysis System",
+      title: "Intrusion Detection System",
       category: "Cybersecurity",
-      description: "Advanced institutions detection system for OSs and Servers",
+      description: "A security tool that monitors web servers traffic and system activity for malicious activity",
       tech: ["Python", "FastApi", "Angular", "PostgreSQL","Stripe","SQLAlchemy", "ng2-charts"],
       image: "/las.png",
     },
     {
-      title: "EcoCommerce Platform",
+      title: "E-Commerce Platform",
       category: "Web Development",
-      description: "Sustainable e-commerce platform with carbon tracking",
+      description: "Sustainable e-commerce platform for beekeeping products",
       tech: ["Python", "FastApi", "Angular", "PostgreSQL", "Bootstrap", "Gsap", "Github Actions","Docker"],
       image: "/apiculture.png",
     },
     {
       title: "PFE PFA Book",
       category: "Mobile Development",
-      description: "Cross-platform health monitoring application",
+      description: "Cross-platform for managing internships books",
       tech: ["Dart","Flutter", "Firebase","Github", "PlayStore Deployment", "Google Analytics"],
       image: "/pfepfa.jpeg",
     },
