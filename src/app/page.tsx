@@ -443,7 +443,7 @@ export default function Portfolio() {
           })
         })
 
-        // Keep the stats animation as it's user-friendly
+        // Keep the stats animation as it&apos;s user-friendly
         stats.forEach((stat, index) => {
           const number = stat.querySelector(".stat-number")
           const label = stat.querySelector(".stat-label")
@@ -727,21 +727,21 @@ export default function Portfolio() {
       category: "Cybersecurity",
       description: "Advanced institutions detection system for OSs and Servers",
       tech: ["Python", "FastApi", "Angular", "PostgreSQL","Stripe","SQLAlchemy", "ng2-charts"],
-      image: "/placeholder.svg?height=200&width=300&text=SecureBank+Dashboard",
+      image: "/las.png",
     },
     {
       title: "EcoCommerce Platform",
       category: "Web Development",
       description: "Sustainable e-commerce platform with carbon tracking",
       tech: ["Python", "FastApi", "Angular", "PostgreSQL", "Bootstrap", "Gsap", "Github Actions","Docker"],
-      image: "/placeholder.svg?height=200&width=300&text=EcoCommerce+Platform",
+      image: "/apiculture.png",
     },
     {
       title: "PFE PFA Book",
       category: "Mobile Development",
       description: "Cross-platform health monitoring application",
       tech: ["Dart","Flutter", "Firebase","Github", "PlayStore Deployment", "Google Analytics"],
-      image: "/placeholder.svg?height=200&width=300&text=HealthTracker+Mobile",
+      image: "/pfepfa.jpeg",
     },
   ]
 
@@ -974,7 +974,7 @@ export default function Portfolio() {
               <p className="text-white/80 text-lg mb-6">
                 We are a team of passionate developers and cybersecurity experts dedicated to creating secure,
                 innovative digital solutions. With years of experience in the industry, we understand the critical
-                importance of both functionality and security in today's digital landscape.
+                importance of both functionality and security in today&apos;s digital landscape.
               </p>
               <p className="text-white/80 text-lg mb-8">
                 Our mission is to help businesses thrive in the digital age by providing robust, scalable, and secure
@@ -1027,7 +1027,7 @@ export default function Portfolio() {
       <section id="contact" className="py-20 px-6" ref={contactRef}>
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Let's Work Together</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Let&apos;s Work Together</h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Ready to secure and scale your digital presence? Get in touch with us today.
             </p>
