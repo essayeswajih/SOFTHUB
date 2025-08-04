@@ -147,6 +147,7 @@ export default function Portfolio() {
   const techRef = useRef<HTMLDivElement>(null)
   const aboutRef = useRef<HTMLDivElement>(null)
   const contactRef = useRef<HTMLDivElement>(null)
+  const pricingRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -443,7 +444,7 @@ export default function Portfolio() {
           })
         })
 
-        // Keep the stats animation as it&apos;s user-friendly
+        // Keep the stats animation as it's user-friendly
         stats.forEach((stat, index) => {
           const number = stat.querySelector(".stat-number")
           const label = stat.querySelector(".stat-label")
@@ -658,6 +659,84 @@ export default function Portfolio() {
         })
       }
 
+      // Pricing Section - Professional Card Animations
+      if (pricingRef.current) {
+        const pricingCards = pricingRef.current.querySelectorAll(".pricing-card")
+        const pricingFeatures = pricingRef.current.querySelectorAll(".pricing-feature")
+
+        // Staggered card entrance
+        gsap.fromTo(
+          pricingCards,
+          {
+            opacity: 0,
+            y: 60,
+            scale: 0.9,
+            rotationY: 15,
+            transformPerspective: 1000,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationY: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: pricingRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        )
+
+        // Hover effects for pricing cards
+        pricingCards.forEach((card, index) => {
+          card.addEventListener("mouseenter", () => {
+            gsap.to(card, {
+              scale: 1.05,
+              y: -10,
+              rotationY: 5,
+              boxShadow: "0 20px 40px rgba(0, 255, 255, 0.2)",
+              duration: 0.3,
+              ease: "power2.out",
+            })
+          })
+
+          card.addEventListener("mouseleave", () => {
+            gsap.to(card, {
+              scale: 1,
+              y: 0,
+              rotationY: 0,
+              boxShadow: "0 0 0 rgba(0, 255, 255, 0)",
+              duration: 0.3,
+              ease: "power2.out",
+            })
+          })
+        })
+
+        // Feature list animations
+        gsap.fromTo(
+          pricingFeatures,
+          {
+            opacity: 0,
+            x: -20,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.4,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: pricingRef.current,
+              start: "top 70%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        )
+      }
+
       // Add hover animations for service cards
       const serviceCards = document.querySelectorAll(".service-card")
       serviceCards.forEach((card) => {
@@ -711,53 +790,109 @@ export default function Portfolio() {
       icon: Globe,
       title: "Web Development",
       description: "Modern, responsive websites and web applications",
-      features: ["Angular/Next.js", "Full-Stack Development", "E-commerce", "API Integration"],
+      features: ["React/Next.js", "Full-Stack Development", "E-commerce", "API Integration"],
     },
     {
       icon: Smartphone,
       title: "Mobile Development",
       description: "Native and cross-platform mobile applications",
-      features: ["iOS & Android", "Flutter", "Kotlin", "Play Store Deployment"],
+      features: ["iOS & Android", "React Native", "Flutter", "App Store Deployment"],
     },
   ]
 
   const projects = [
     {
-      title: "Intrusion Detection System",
+      title: "SecureBank Dashboard",
       category: "Cybersecurity",
-      description: "A security tool that monitors web servers traffic and system activity for malicious activity",
-      tech: ["Python", "FastApi", "Angular", "PostgreSQL","Stripe","SQLAlchemy", "ng2-charts"],
-      image: "/las.png",
+      description: "Advanced threat detection system for financial institutions",
+      tech: ["Python", "Machine Learning", "React", "PostgreSQL"],
+      image: "/placeholder.svg?height=200&width=300&text=SecureBank+Dashboard",
     },
     {
-      title: "E-Commerce Platform",
+      title: "EcoCommerce Platform",
       category: "Web Development",
-      description: "Sustainable e-commerce platform for beekeeping products",
-      tech: ["Python", "FastApi", "Angular", "PostgreSQL", "Bootstrap", "Gsap", "Github Actions","Docker"],
-      image: "/apiculture.png",
+      description: "Sustainable e-commerce platform with carbon tracking",
+      tech: ["Next.js", "Stripe", "MongoDB", "Tailwind CSS"],
+      image: "/placeholder.svg?height=200&width=300&text=EcoCommerce+Platform",
     },
     {
-      title: "PFE PFA Book",
+      title: "HealthTracker Mobile",
       category: "Mobile Development",
-      description: "Cross-platform for managing internships books",
-      tech: ["Dart","Flutter", "Firebase","Github", "PlayStore Deployment", "Google Analytics"],
-      image: "/pfepfa.jpeg",
+      description: "Cross-platform health monitoring application",
+      tech: ["React Native", "Firebase", "HealthKit", "Charts"],
+      image: "/placeholder.svg?height=200&width=300&text=HealthTracker+Mobile",
     },
   ]
 
   const technologies = [
-    "Angular",
+    "React",
     "Next.js",
-    "FastAPI",
-    "Spring Boot",
     "Node.js",
-    "TypeScript",
     "Python",
+    "TypeScript",
+    "MongoDB",
     "PostgreSQL",
-    "Kotlin",
-    "Flutter",
+    "AWS",
     "Docker",
-    "CI/CD",
+    "Kubernetes",
+    "React Native",
+    "Flutter",
+  ]
+
+  const pricingPlans = [
+    {
+      name: "Starter",
+      price: "$999",
+      period: "per project",
+      description: "Perfect for small businesses and startups",
+      features: [
+        "Basic Security Audit",
+        "Simple Web Application",
+        "Mobile App Prototype",
+        "2 Revisions",
+        "Email Support",
+        "1 Month Support",
+      ],
+      popular: false,
+      buttonText: "Get Started",
+    },
+    {
+      name: "Professional",
+      price: "$2,499",
+      period: "per project",
+      description: "Ideal for growing businesses",
+      features: [
+        "Comprehensive Security Assessment",
+        "Full-Stack Web Application",
+        "Cross-Platform Mobile App",
+        "5 Revisions",
+        "Priority Support",
+        "3 Months Support",
+        "Performance Optimization",
+        "SEO Implementation",
+      ],
+      popular: true,
+      buttonText: "Most Popular",
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      period: "contact us",
+      description: "For large organizations with complex needs",
+      features: [
+        "Advanced Penetration Testing",
+        "Enterprise Web Solutions",
+        "Native Mobile Applications",
+        "Unlimited Revisions",
+        "24/7 Dedicated Support",
+        "12 Months Support",
+        "Custom Integrations",
+        "Training & Documentation",
+        "Ongoing Maintenance",
+      ],
+      popular: false,
+      buttonText: "Contact Sales",
+    },
   ]
 
   return (
@@ -808,6 +943,9 @@ export default function Portfolio() {
               <CustomButton
                 size="lg"
                 className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white border-0"
+                onClick={() => {
+                  document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })
+                }}
               >
                 Get Started <ArrowRight className="ml-2 w-4 h-4" />
               </CustomButton>
@@ -965,6 +1103,89 @@ export default function Portfolio() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 px-6 bg-black/20" ref={pricingRef}>
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Choose Your Plan</h2>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">
+              Flexible pricing options designed to scale with your business needs
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <CustomCard
+                key={index}
+                className={`pricing-card relative bg-white/5 border-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer ${
+                  plan.popular
+                    ? "border-cyan-400/50 bg-gradient-to-br from-cyan-500/10 to-purple-600/10"
+                    : "hover:bg-white/10"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <CustomBadge className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white border-0 px-4 py-1">
+                      Most Popular
+                    </CustomBadge>
+                  </div>
+                )}
+
+                <CustomCardHeader className="text-center">
+                  <CustomCardTitle className="text-white text-2xl mb-2">{plan.name}</CustomCardTitle>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold text-white">{plan.price}</span>
+                    <span className="text-white/70 ml-2">{plan.period}</span>
+                  </div>
+                  <CustomCardDescription className="text-white/70 text-base">{plan.description}</CustomCardDescription>
+                </CustomCardHeader>
+
+                <CustomCardContent>
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="pricing-feature flex items-center text-white/80">
+                        <CheckCircle className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <CustomButton
+                    className={`w-full ${
+                      plan.popular
+                        ? "bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white border-0"
+                        : "border-white/20 text-white hover:bg-white/10 bg-transparent"
+                    }`}
+                    variant={plan.popular ? "default" : "outline"}
+                  >
+                    {plan.buttonText}
+                  </CustomButton>
+                </CustomCardContent>
+              </CustomCard>
+            ))}
+          </div>
+
+          {/* Additional Info */}
+          <div className="text-center mt-12">
+            <p className="text-white/60 mb-4">All plans include free consultation and project planning</p>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-white/70">
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                No Hidden Fees
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                Money-Back Guarantee
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                Flexible Payment Terms
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* About Section - Enhanced with 3D */}
       <section id="about" className="py-20 px-6 bg-black/20" ref={aboutRef}>
         <div className="container mx-auto">
@@ -974,7 +1195,7 @@ export default function Portfolio() {
               <p className="text-white/80 text-lg mb-6">
                 We are a team of passionate developers and cybersecurity experts dedicated to creating secure,
                 innovative digital solutions. With years of experience in the industry, we understand the critical
-                importance of both functionality and security in today&apos;s digital landscape.
+                importance of both functionality and security in today's digital landscape.
               </p>
               <p className="text-white/80 text-lg mb-8">
                 Our mission is to help businesses thrive in the digital age by providing robust, scalable, and secure
@@ -1027,7 +1248,7 @@ export default function Portfolio() {
       <section id="contact" className="py-20 px-6" ref={contactRef}>
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Let&apos;s Work Together</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Let's Work Together</h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Ready to secure and scale your digital presence? Get in touch with us today.
             </p>
@@ -1051,7 +1272,7 @@ export default function Portfolio() {
                   </div>
                   <div>
                     <div className="text-white font-medium">Phone</div>
-                    <div className="text-white/70">+216 27 553 981</div>
+                    <div className="text-white/70">+1 (555) 123-4567</div>
                   </div>
                 </div>
                 <div className="contact-item flex items-center space-x-4">
@@ -1060,7 +1281,7 @@ export default function Portfolio() {
                   </div>
                   <div>
                     <div className="text-white font-medium">Location</div>
-                    <div className="text-white/70">Monastir, Tunisia</div>
+                    <div className="text-white/70">San Francisco, CA</div>
                   </div>
                 </div>
               </div>
@@ -1144,7 +1365,7 @@ export default function Portfolio() {
               </div>
               <span className="text-xl font-bold text-white">SoftHub</span>
             </div>
-            <div className="text-white/60 text-sm">© 2025 SoftHub. All rights reserved.</div>
+            <div className="text-white/60 text-sm">© 2024 SoftHub. All rights reserved.</div>
           </div>
         </div>
       </footer>
