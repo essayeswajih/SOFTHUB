@@ -1378,7 +1378,7 @@ export default function Portfolio() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
-                <Code className="w-5 h-5 text-white" />
+                <SoftHubLogo size={32} className="w-8 h-8" />
               </div>
               <span className="text-xl font-bold text-white">SoftHub</span>
             </div>
