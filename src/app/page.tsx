@@ -1,27 +1,20 @@
 "use client"
 
-import { useEffect, useRef, type ReactNode, type ButtonHTMLAttributes, type HTMLAttributes } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  type ReactNode,
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+} from "react"
+import { useActionState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { TextPlugin } from "gsap/TextPlugin"
-import {
-  Shield,
-  Globe,
-  Smartphone,
-  Code,
-  Server,
-  Database,
-  Zap,
-  ArrowRight,
-  Mail,
-  Phone,
-  MapPin,
-  Github,
-  Linkedin,
-  Twitter,
-  CheckCircle,
-} from "lucide-react"
-import { SoftHubLogo } from "@/components/ui/logo"
+import { Shield, Globe, Smartphone, Code, Server, Database, Zap, ArrowRight, Mail, Phone, MapPin, Github, Linkedin, Twitter, CheckCircle } from 'lucide-react'
+import { sendContactEmail, type ContactState } from "./actions/send-emails"
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -54,9 +47,9 @@ const CustomButton = ({
   }
 
   if (variant === "outline") {
-    buttonClass += " border border-gray-300 bg-transparent hover:bg-gray-100 text-gray-700"
+    buttonClass += " border border-white/20 bg-transparent hover:bg-white/10 text-white"
   } else {
-    buttonClass += " bg-blue-600 text-white shadow hover:bg-blue-700"
+    buttonClass += " bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow hover:from-cyan-600 hover:to-purple-700"
   }
 
   buttonClass += ` ${className}`
@@ -75,7 +68,7 @@ interface CustomCardProps extends HTMLAttributes<HTMLDivElement> {
 
 const CustomCard = ({ children, className = "", ...props }: CustomCardProps) => {
   return (
-    <div className={`rounded-md border border-gray-200 bg-white text-gray-900 shadow-sm ${className}`} {...props}>
+    <div className={`rounded-md border border-white/10 bg-white/5 text-white shadow-sm backdrop-blur-sm ${className}`} {...props}>
       {children}
     </div>
   )
@@ -107,7 +100,7 @@ const CustomCardTitle = ({ children, className = "", ...props }: CustomCardProps
 
 const CustomCardDescription = ({ children, className = "", ...props }: CustomCardProps) => {
   return (
-    <p className={`text-sm text-gray-600 ${className}`} {...props}>
+    <p className={`text-sm text-white/70 ${className}`} {...props}>
       {children}
     </p>
   )
@@ -121,12 +114,12 @@ interface CustomBadgeProps extends HTMLAttributes<HTMLDivElement> {
 
 const CustomBadge = ({ children, variant = "default", className = "", ...props }: CustomBadgeProps) => {
   let badgeClass =
-    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent"
 
   if (variant === "secondary") {
-    badgeClass += " border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200"
+    badgeClass += " border-white/20 bg-white/10 text-white/90 hover:bg-white/20"
   } else {
-    badgeClass += " border-gray-300 bg-gray-50 text-gray-700"
+    badgeClass += " border-white/20 bg-white/5 text-white/90"
   }
 
   badgeClass += ` ${className}`
@@ -150,32 +143,46 @@ export default function Portfolio() {
   const contactRef = useRef<HTMLDivElement>(null)
   const pricingRef = useRef<HTMLDivElement>(null)
 
+  // Contact form plan select handling
+  const planSelectRef = useRef<HTMLSelectElement>(null)
+  const [successFlash, setSuccessFlash] = useState(false)
+
+  useEffect(() => {
+    // Prefill plan from URL
+    const params = new URLSearchParams(window.location.search)
+    const plan = params.get("plan")
+    if (plan && planSelectRef.current) {
+      planSelectRef.current.value = plan
+    }
+  }, [])
+
+  const initialState: ContactState = useMemo(
+    () => ({ ok: false, message: "" }),
+    [],
+  )
+  const [state, action, isPending] = useActionState(sendContactEmail, initialState)
+
+  useEffect(() => {
+    if (state?.ok) {
+      setSuccessFlash(true)
+      const t = setTimeout(() => setSuccessFlash(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [state?.ok])
+
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Hero section animations
       const tl = gsap.timeline()
 
-      // Animate hero title with split text effect
       if (titleRef.current) {
         gsap.set(titleRef.current, { opacity: 1 })
         tl.fromTo(
           titleRef.current,
-          {
-            opacity: 0,
-            y: 100,
-            scale: 0.8,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1.2,
-            ease: "power3.out",
-          },
+          { opacity: 0, y: 100, scale: 0.8 },
+          { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: "power3.out" },
         )
       }
 
-      // Animate subtitle
       if (subtitleRef.current) {
         tl.fromTo(
           subtitleRef.current,
@@ -185,35 +192,20 @@ export default function Portfolio() {
         )
       }
 
-      // Animate buttons
       if (buttonsRef.current) {
         tl.fromTo(
           buttonsRef.current.children,
           { opacity: 0, y: 30, scale: 0.9 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.6,
-            stagger: 0.2,
-            ease: "back.out(1.7)",
-          },
+          { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.2, ease: "back.out(1.7)" },
           "-=0.4",
         )
       }
 
-      // Services section scroll animations
       if (servicesRef.current) {
         const serviceCards = servicesRef.current.querySelectorAll(".service-card")
-
         gsap.fromTo(
           serviceCards,
-          {
-            opacity: 0,
-            y: 80,
-            rotationX: 45,
-            transformPerspective: 1000,
-          },
+          { opacity: 0, y: 80, rotationX: 45, transformPerspective: 1000 },
           {
             opacity: 1,
             y: 0,
@@ -221,558 +213,125 @@ export default function Portfolio() {
             duration: 1,
             stagger: 0.2,
             ease: "power3.out",
-            scrollTrigger: {
-              trigger: servicesRef.current,
-              start: "top 80%",
-              end: "bottom 20%",
-              toggleActions: "play none none reverse",
-            },
+            scrollTrigger: { trigger: servicesRef.current, start: "top 80%", end: "bottom 20%", toggleActions: "play none none reverse" },
           },
         )
       }
 
-      // Projects section animations
       if (projectsRef.current) {
-        const projectCards = projectsRef.current.querySelectorAll(".project-card")
-
-        projectCards.forEach((card, index) => {
+        const cards = projectsRef.current.querySelectorAll(".project-card")
+        cards.forEach((card, index) => {
           gsap.fromTo(
             card,
-            {
-              opacity: 0,
-              x: index % 2 === 0 ? -100 : 100,
-              rotation: index % 2 === 0 ? -5 : 5,
-            },
-            {
-              opacity: 1,
-              x: 0,
-              rotation: 0,
-              duration: 1,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: card,
-                start: "top 85%",
-                toggleActions: "play none none reverse",
-              },
-            },
+            { opacity: 0, x: index % 2 === 0 ? -100 : 100, rotation: index % 2 === 0 ? -5 : 5 },
+            { opacity: 1, x: 0, rotation: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: card, start: "top 85%", toggleActions: "play none none reverse" } },
           )
         })
       }
 
-      // Technologies Section - Professional UX Animation
       if (techRef.current) {
-        const techBadges = techRef.current.querySelectorAll(".tech-badge")
-
-        // Professional staggered entrance
+        const badges = techRef.current.querySelectorAll(".tech-badge")
         gsap.fromTo(
-          techBadges,
-          {
-            opacity: 0,
-            y: 30,
-            scale: 0.8,
-          },
+          badges,
+          { opacity: 0, y: 30, scale: 0.8 },
           {
             opacity: 1,
             y: 0,
             scale: 1,
             duration: 0.6,
-            stagger: {
-              amount: 1.2,
-              from: "random",
-              ease: "power2.out",
-            },
+            stagger: { amount: 1.2, from: "random", ease: "power2.out" },
             ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: techRef.current,
-              start: "top 75%",
-              toggleActions: "play none none reverse",
-            },
+            scrollTrigger: { trigger: techRef.current, start: "top 75%", toggleActions: "play none none reverse" },
           },
         )
-
-        // Professional hover effects
-        techBadges.forEach((badge, index) => {
-          // Add subtle breathing animation
-          gsap.to(badge, {
-            scale: 1.02,
-            duration: 2 + Math.random() * 1,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: index * 0.1,
-          })
-
-          badge.addEventListener("mouseenter", () => {
-            gsap.to(badge, {
-              scale: 1.1,
-              y: -8,
-              boxShadow: "0 10px 25px rgba(0, 255, 255, 0.3)",
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
-
-          badge.addEventListener("mouseleave", () => {
-            gsap.to(badge, {
-              scale: 1,
-              y: 0,
-              boxShadow: "0 0 0 rgba(0, 255, 255, 0)",
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
+        badges.forEach((b, i) => {
+          gsap.to(b, { scale: 1.02, duration: 2 + Math.random(), repeat: -1, yoyo: true, ease: "sine.inOut", delay: i * 0.1 })
+          b.addEventListener("mouseenter", () => gsap.to(b, { scale: 1.1, y: -8, boxShadow: "0 10px 25px rgba(0, 255, 255, 0.3)", duration: 0.3, ease: "power2.out" }))
+          b.addEventListener("mouseleave", () => gsap.to(b, { scale: 1, y: 0, boxShadow: "0 0 0 rgba(0,0,0,0)", duration: 0.3, ease: "power2.out" }))
         })
-
-        // Add wave effect on scroll
         ScrollTrigger.create({
           trigger: techRef.current,
           start: "top 60%",
-          onEnter: () => {
-            gsap.to(techBadges, {
-              y: -5,
-              duration: 0.4,
-              stagger: {
-                amount: 0.8,
-                from: "start",
-              },
-              ease: "power2.out",
-              yoyo: true,
-              repeat: 1,
-            })
-          },
+          onEnter: () => gsap.to(badges, { y: -5, duration: 0.4, stagger: { amount: 0.8, from: "start" }, ease: "power2.out", yoyo: true, repeat: 1 }),
         })
-
-        // Animate tech stats
-        const techStats = techRef.current.querySelectorAll(".tech-stat")
-        techStats.forEach((stat, index) => {
+        const stats = techRef.current.querySelectorAll(".tech-stat")
+        stats.forEach((stat, index) => {
           const number = stat.querySelector("div:first-child")
-
           gsap.fromTo(
             stat,
-            {
-              opacity: 0,
-              y: 20,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              delay: index * 0.2 + 0.5,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: stat,
-                start: "top 85%",
-                toggleActions: "play none none reverse",
-              },
-            },
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6, delay: index * 0.2 + 0.5, ease: "power2.out", scrollTrigger: { trigger: stat, start: "top 85%", toggleActions: "play none none reverse" } },
           )
-
-          // Number counting animation
           if (number) {
             const finalValue = number.textContent
             gsap.fromTo(
               number,
               { textContent: "0" },
-              {
-                textContent: finalValue,
-                duration: 1.5,
-                delay: index * 0.2 + 0.8,
-                ease: "power2.out",
-                snap: { textContent: 1 },
-                scrollTrigger: {
-                  trigger: stat,
-                  start: "top 85%",
-                  toggleActions: "play none none reverse",
-                },
-              },
+              { textContent: finalValue, duration: 1.5, delay: index * 0.2 + 0.8, ease: "power2.out", snap: { textContent: 1 }, scrollTrigger: { trigger: stat, start: "top 85%", toggleActions: "play none none reverse" } },
             )
           }
         })
       }
 
-      // Pricing Section - Professional Card Animations
       if (pricingRef.current) {
-        const pricingCards = pricingRef.current.querySelectorAll(".pricing-card")
-        const pricingFeatures = pricingRef.current.querySelectorAll(".pricing-feature")
-
-        // Staggered card entrance
+        const cards = pricingRef.current.querySelectorAll(".pricing-card")
+        const features = pricingRef.current.querySelectorAll(".pricing-feature")
         gsap.fromTo(
-          pricingCards,
-          {
-            opacity: 0,
-            y: 60,
-            scale: 0.9,
-            rotationY: 15,
-            transformPerspective: 1000,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotationY: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: pricingRef.current,
-              start: "top 80%",
-              toggleActions: "play none none reverse",
-            },
-          },
+          cards,
+          { opacity: 0, y: 60, scale: 0.9, rotationY: 15, transformPerspective: 1000 },
+          { opacity: 1, y: 0, scale: 1, rotationY: 0, duration: 0.8, stagger: 0.2, ease: "power3.out", scrollTrigger: { trigger: pricingRef.current, start: "top 80%", toggleActions: "play none none reverse" } },
         )
-
-        // Hover effects for pricing cards
-        pricingCards.forEach((card, index) => {
-          card.addEventListener("mouseenter", () => {
-            gsap.to(card, {
-              scale: 1.05,
-              y: -10,
-              rotationY: 5,
-              boxShadow: "0 20px 40px rgba(0, 255, 255, 0.2)",
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
-
-          card.addEventListener("mouseleave", () => {
-            gsap.to(card, {
-              scale: 1,
-              y: 0,
-              rotationY: 0,
-              boxShadow: "0 0 0 rgba(0, 255, 255, 0)",
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
+        gsap.fromTo(
+          features,
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.4, stagger: 0.1, ease: "power2.out", scrollTrigger: { trigger: pricingRef.current, start: "top 70%", toggleActions: "play none none reverse" } },
+        )
+        cards.forEach((card) => {
+          card.addEventListener("mouseenter", () => gsap.to(card, { scale: 1.05, y: -10, rotationY: 5, boxShadow: "0 20px 40px rgba(0, 255, 255, 0.2)", duration: 0.3, ease: "power2.out" }))
+          card.addEventListener("mouseleave", () => gsap.to(card, { scale: 1, y: 0, rotationY: 0, boxShadow: "0 0 0 rgba(0,0,0,0)", duration: 0.3, ease: "power2.out" }))
         })
-
-        // Feature list animations
-        gsap.fromTo(
-          pricingFeatures,
-          {
-            opacity: 0,
-            x: -20,
-          },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.4,
-            stagger: 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: pricingRef.current,
-              start: "top 70%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        )
       }
 
-      // About Section - 3D Icon Grid Animation
       if (aboutRef.current) {
-        const iconGrid = aboutRef.current.querySelector(".icon-grid")
         const icons = aboutRef.current.querySelectorAll(".tech-icon")
         const stats = aboutRef.current.querySelectorAll(".stat-item")
-
-        // Simplified Icons entrance - just fade and scale
         gsap.fromTo(
           icons,
-          {
-            opacity: 0,
-            scale: 0.5,
-            y: 30,
-          },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: {
-              amount: 1,
-              grid: [3, 2],
-              from: "center",
-            },
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: aboutRef.current,
-              start: "top 70%",
-              toggleActions: "play none none reverse",
-            },
-          },
+          { opacity: 0, scale: 0.5, y: 30 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.8, stagger: { amount: 1, grid: [3, 2], from: "center" }, ease: "back.out(1.7)", scrollTrigger: { trigger: aboutRef.current, start: "top 70%", toggleActions: "play none none reverse" } },
         )
-
-        // Remove the continuous rotation for icon grid
-        // Simple hover effects only
-        icons.forEach((icon, index) => {
-          icon.addEventListener("mouseenter", () => {
-            gsap.to(icon, {
-              scale: 1.1,
-              y: -5,
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
-
-          icon.addEventListener("mouseleave", () => {
-            gsap.to(icon, {
-              scale: 1,
-              y: 0,
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
+        icons.forEach((icon) => {
+          icon.addEventListener("mouseenter", () => gsap.to(icon, { scale: 1.1, y: -5, duration: 0.3, ease: "power2.out" }))
+          icon.addEventListener("mouseleave", () => gsap.to(icon, { scale: 1, y: 0, duration: 0.3, ease: "power2.out" }))
         })
-
-        // Keep the stats animation as it's user-friendly
         stats.forEach((stat, index) => {
           const number = stat.querySelector(".stat-number")
-          const label = stat.querySelector(".stat-label")
-
           gsap.fromTo(
             stat,
-            {
-              opacity: 0,
-              y: 30,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              delay: index * 0.2,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: stat,
-                start: "top 85%",
-                toggleActions: "play none none reverse",
-              },
-            },
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.8, delay: index * 0.2, ease: "power2.out", scrollTrigger: { trigger: stat, start: "top 85%", toggleActions: "play none none reverse" } },
           )
-
-          // Number counting animation
           if (number) {
             const finalValue = number.textContent
             gsap.fromTo(
               number,
               { textContent: "0" },
-              {
-                textContent: finalValue,
-                duration: 2,
-                delay: index * 0.2 + 0.5,
-                ease: "power2.out",
-                snap: { textContent: 1 },
-                scrollTrigger: {
-                  trigger: stat,
-                  start: "top 85%",
-                  toggleActions: "play none none reverse",
-                },
-              },
+              { textContent: finalValue, duration: 2, delay: index * 0.2 + 0.5, ease: "power2.out", snap: { textContent: 1 }, scrollTrigger: { trigger: stat, start: "top 85%", toggleActions: "play none none reverse" } },
             )
           }
         })
       }
 
-      // Contact Section - 3D Card Flip and Form Animation
-      if (contactRef.current) {
-        const contactInfo = contactRef.current.querySelector(".contact-info")
-        const contactForm = contactRef.current.querySelector(".contact-form")
-        const contactItems = contactRef.current.querySelectorAll(".contact-item")
-        const formInputs = contactRef.current.querySelectorAll(".form-input")
-        const socialButtons = contactRef.current.querySelectorAll(".social-btn")
-
-        // Contact info 3D entrance
-        gsap.fromTo(
-          contactInfo,
-          {
-            opacity: 0,
-            rotationY: -90,
-            x: -100,
-            transformPerspective: 1000,
-          },
-          {
-            opacity: 1,
-            rotationY: 0,
-            x: 0,
-            duration: 1.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: contactRef.current,
-              start: "top 75%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        )
-
-        // Contact form 3D entrance
-        gsap.fromTo(
-          contactForm,
-          {
-            opacity: 0,
-            rotationY: 90,
-            x: 100,
-            transformPerspective: 1000,
-          },
-          {
-            opacity: 1,
-            rotationY: 0,
-            x: 0,
-            duration: 1.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: contactRef.current,
-              start: "top 75%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        )
-
-        // Contact items staggered animation
-        gsap.fromTo(
-          contactItems,
-          {
-            opacity: 0,
-            rotationX: 45,
-            y: 30,
-            transformPerspective: 1000,
-          },
-          {
-            opacity: 1,
-            rotationX: 0,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: contactInfo,
-              start: "top 80%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        )
-
-        // Form inputs 3D animation
-        gsap.fromTo(
-          formInputs,
-          {
-            opacity: 0,
-            rotationX: 90,
-            y: 20,
-            transformPerspective: 1000,
-          },
-          {
-            opacity: 1,
-            rotationX: 0,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: contactForm,
-              start: "top 80%",
-              toggleActions: "play none none reverse",
-            },
-          },
-        )
-
-        // Social buttons 3D hover effects
-        socialButtons.forEach((btn, index) => {
-          gsap.set(btn, {
-            transformPerspective: 1000,
-            transformStyle: "preserve-3d",
-          })
-
-          // Continuous subtle rotation
-          gsap.to(btn, {
-            rotationY: Math.sin(index) * 5,
-            rotationX: Math.cos(index) * 3,
-            duration: 3 + Math.random(),
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: index * 0.2,
-          })
-
-          btn.addEventListener("mouseenter", () => {
-            gsap.to(btn, {
-              scale: 1.2,
-              rotationY: 180,
-              rotationX: 10,
-              z: 20,
-              duration: 0.6,
-              ease: "back.out(1.7)",
-            })
-          })
-
-          btn.addEventListener("mouseleave", () => {
-            gsap.to(btn, {
-              scale: 1,
-              rotationY: 0,
-              rotationX: 0,
-              z: 0,
-              duration: 0.4,
-              ease: "power2.out",
-            })
-          })
-        })
-
-        // Form input focus effects
-        formInputs.forEach((input) => {
-          input.addEventListener("focus", () => {
-            gsap.to(input, {
-              scale: 1.02,
-              rotationX: -2,
-              z: 5,
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
-
-          input.addEventListener("blur", () => {
-            gsap.to(input, {
-              scale: 1,
-              rotationX: 0,
-              z: 0,
-              duration: 0.3,
-              ease: "power2.out",
-            })
-          })
-        })
-      }
-
-      // Add hover animations for service cards
       const serviceCards = document.querySelectorAll(".service-card")
       serviceCards.forEach((card) => {
         const icon = card.querySelector(".service-icon")
-
         card.addEventListener("mouseenter", () => {
-          gsap.to(card, {
-            scale: 1.05,
-            y: -10,
-            rotationY: 5,
-            duration: 0.3,
-            ease: "power2.out",
-          })
-          gsap.to(icon, {
-            rotation: 360,
-            scale: 1.2,
-            duration: 0.6,
-            ease: "back.out(1.7)",
-          })
+          gsap.to(card, { scale: 1.05, y: -10, rotationY: 5, duration: 0.3, ease: "power2.out" })
+          gsap.to(icon, { rotation: 360, scale: 1.2, duration: 0.6, ease: "back.out(1.7)" })
         })
-
         card.addEventListener("mouseleave", () => {
-          gsap.to(card, {
-            scale: 1,
-            y: 0,
-            rotationY: 0,
-            duration: 0.3,
-            ease: "power2.out",
-          })
-          gsap.to(icon, {
-            rotation: 0,
-            scale: 1,
-            duration: 0.4,
-            ease: "power2.out",
-          })
+          gsap.to(card, { scale: 1, y: 0, rotationY: 0, duration: 0.3, ease: "power2.out" })
+          gsap.to(icon, { rotation: 0, scale: 1, duration: 0.4, ease: "power2.out" })
         })
       })
     }, heroRef)
@@ -825,20 +384,7 @@ export default function Portfolio() {
     },
   ]
 
-  const technologies = [
-    "Angular",
-    "Next.js",
-    "FastAPI",
-    "Spring Boot",
-    "Node.js",
-    "TypeScript",
-    "Python",
-    "PostgreSQL",
-    "Kotlin",
-    "Flutter",
-    "Docker",
-    "CI/CD",
-  ]
+  const technologies = ["Angular", "Next.js", "FastAPI", "Spring Boot", "Node.js", "TypeScript", "Python", "PostgreSQL", "Kotlin", "Flutter", "Docker", "CI/CD"]
 
   const pricingPlans = [
     {
@@ -914,7 +460,9 @@ export default function Portfolio() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <SoftHubLogo size={32} className="w-8 h-8" />
+              <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                <Code className="w-5 h-5 text-white" />
+              </div>
               <span className="text-2xl font-bold text-white">SoftHub</span>
             </div>
             <div className="hidden md:flex space-x-8">
@@ -952,7 +500,6 @@ export default function Portfolio() {
             <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-4 justify-center">
               <CustomButton
                 size="lg"
-                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white border-0"
                 onClick={() => {
                   document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })
                 }}
@@ -962,7 +509,6 @@ export default function Portfolio() {
               <CustomButton
                 size="lg"
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10 bg-transparent"
                 onClick={() => {
                   document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth" })
                 }}
@@ -987,14 +533,14 @@ export default function Portfolio() {
             {services.map((service, index) => (
               <CustomCard
                 key={index}
-                className="service-card bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                className="service-card hover:bg-white/10 transition-all duration-300 cursor-pointer"
               >
                 <CustomCardHeader>
                   <div className="service-icon w-12 h-12 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center mb-4">
                     <service.icon className="w-6 h-6 text-white" />
                   </div>
                   <CustomCardTitle className="text-white text-xl">{service.title}</CustomCardTitle>
-                  <CustomCardDescription className="text-white/70">{service.description}</CustomCardDescription>
+                  <CustomCardDescription>{service.description}</CustomCardDescription>
                 </CustomCardHeader>
                 <CustomCardContent>
                   <ul className="space-y-2">
@@ -1025,11 +571,11 @@ export default function Portfolio() {
             {projects.map((project, index) => (
               <CustomCard
                 key={index}
-                className="project-card bg-white/5 border-white/10 backdrop-blur-sm overflow-hidden hover:scale-105 transition-transform duration-300"
+                className="project-card overflow-hidden hover:scale-[1.01] transition-transform duration-300"
               >
                 <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden">
                   <img
-                    src={project.image || "/placeholder.svg"}
+                    src={project.image || "/placeholder.svg?height=200&width=300&query=project+image"}
                     alt={project.title}
                     className="w-full h-full object-cover"
                   />
@@ -1041,12 +587,12 @@ export default function Portfolio() {
                 </div>
                 <CustomCardHeader>
                   <CustomCardTitle className="text-white">{project.title}</CustomCardTitle>
-                  <CustomCardDescription className="text-white/70">{project.description}</CustomCardDescription>
+                  <CustomCardDescription>{project.description}</CustomCardDescription>
                 </CustomCardHeader>
                 <CustomCardContent>
                   <div className="flex flex-wrap gap-2">
                     {project.tech.map((tech, idx) => (
-                      <CustomBadge key={idx} variant="secondary" className="bg-white/10 text-white/80 border-white/20">
+                      <CustomBadge key={idx} variant="secondary">
                         {tech}
                       </CustomBadge>
                     ))}
@@ -1058,7 +604,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Technologies Section - Enhanced Professional Design */}
+      {/* Technologies Section */}
       <section className="py-20 px-6" ref={techRef}>
         <div className="container mx-auto">
           <div className="text-center mb-16">
@@ -1068,51 +614,42 @@ export default function Portfolio() {
             </p>
           </div>
 
-          {/* Professional Grid Layout */}
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {technologies.map((tech, index) => (
-                <div
-                  key={index}
-                  className="tech-badge group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4 text-center cursor-pointer transition-all duration-300 hover:border-cyan-400/50"
-                >
-                  {/* Background glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-
-                  {/* Tech icon placeholder */}
-                  <div className="relative z-10 mb-2">
-                    <div className="w-8 h-8 mx-auto bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
-                      <Code className="w-4 h-4 text-white" />
-                    </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {technologies.map((tech, index) => (
+              <div
+                key={index}
+                className="tech-badge group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4 text-center cursor-pointer transition-all duration-300 hover:border-cyan-400/50"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                <div className="relative z-10 mb-2">
+                  <div className="w-8 h-8 mx-auto bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                    <Code className="w-4 h-4 text-white" />
                   </div>
-
-                  {/* Tech name */}
-                  <div className="relative z-10 text-white font-medium text-sm group-hover:text-cyan-300 transition-colors duration-300">
-                    {tech}
-                  </div>
-
-                  {/* Animated border */}
-                  <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-gradient-to-r group-hover:from-cyan-400 group-hover:to-purple-500 transition-all duration-300"></div>
                 </div>
-              ))}
-            </div>
+                <div className="relative z-10 text-white font-medium text-sm group-hover:text-cyan-300 transition-colors duration-300">
+                  {tech}
+                </div>
+                <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-gradient-to-r group-hover:from-cyan-400 group-hover:to-purple-500 transition-all duration-300"></div>
+              </div>
+            ))}
+          </div>
 
-            {/* Professional stats below */}
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div className="tech-stat">
-                <div className="text-3xl font-bold text-cyan-400 mb-2">12+</div>
-                <div className="text-white/70">Technologies</div>
-              </div>
-              <div className="tech-stat">
-                <div className="text-3xl font-bold text-purple-400 mb-2">5+</div>
-                <div className="text-white/70">Years Experience</div>
-              </div>
-              <div className="tech-stat">
-                <div className="text-3xl font-bold text-green-400 mb-2">100%</div>
-                <div className="text-white/70">Up to Date</div>
-              </div>
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="tech-stat">
+              <div className="text-3xl font-bold text-cyan-400 mb-2">12+</div>
+              <div className="text-white/70">Technologies</div>
+            </div>
+            <div className="tech-stat">
+              <div className="text-3xl font-bold text-purple-400 mb-2">5+</div>
+              <div className="text-white/70">Years Experience</div>
+            </div>
+            <div className="tech-stat">
+              <div className="text-3xl font-bold text-green-400 mb-2">100%</div>
+              <div className="text-white/70">Up to Date</div>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
@@ -1122,7 +659,7 @@ export default function Portfolio() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">Choose Your Plan</h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
-              Flexible pricing options designed to scale with your business needs and technical requirements
+              Flexible pricing options designed to scale with your business needs
             </p>
           </div>
 
@@ -1130,7 +667,7 @@ export default function Portfolio() {
             {pricingPlans.map((plan, index) => (
               <CustomCard
                 key={index}
-                className={`pricing-card relative bg-white/5 border-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer ${
+                className={`pricing-card relative transition-all duration-300 cursor-pointer ${
                   plan.popular
                     ? "border-cyan-400/50 bg-gradient-to-br from-cyan-500/10 to-purple-600/10"
                     : "hover:bg-white/10"
@@ -1145,12 +682,12 @@ export default function Portfolio() {
                 )}
 
                 <CustomCardHeader className="text-center">
-                  <CustomCardTitle className="text-white text-2xl mb-2">{plan.name}</CustomCardTitle>
+                  <CustomCardTitle className="text-2xl mb-2">{plan.name}</CustomCardTitle>
                   <div className="mb-4">
-                    <span className="text-4xl font-bold text-white">{plan.price}</span>
+                    <span className="text-4xl font-bold">{plan.price}</span>
                     <span className="text-white/70 ml-2">{plan.period}</span>
                   </div>
-                  <CustomCardDescription className="text-white/70 text-base">{plan.description}</CustomCardDescription>
+                  <CustomCardDescription className="text-base">{plan.description}</CustomCardDescription>
                 </CustomCardHeader>
 
                 <CustomCardContent>
@@ -1164,21 +701,25 @@ export default function Portfolio() {
                   </ul>
 
                   <CustomButton
-                    className={`w-full ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white border-0"
-                        : "border-white/20 text-white hover:bg-white/10 bg-transparent"
-                    }`}
-                    variant={plan.popular ? "default" : "outline"}
+                    className="w-full"
+                    onClick={() => {
+                      // Prefill plan and scroll to contact
+                      const params = new URLSearchParams(window.location.search)
+                      params.set("plan", plan.name)
+                      window.history.replaceState(null, "", `?${params.toString()}#contact`)
+                      if (planSelectRef.current) {
+                        planSelectRef.current.value = plan.name
+                      }
+                      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+                    }}
                   >
-                    {plan.buttonText}
+                    {plan.popular ? "Select Professional" : "Select Plan"}
                   </CustomButton>
                 </CustomCardContent>
               </CustomCard>
             ))}
           </div>
 
-          {/* Additional Info */}
           <div className="text-center mt-12">
             <p className="text-white/60 mb-4">All plans include free consultation and project planning</p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-white/70">
@@ -1194,16 +735,12 @@ export default function Portfolio() {
                 <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                 Flexible Payment Terms
               </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                Source Code Included
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* About Section - Enhanced with 3D */}
+      {/* About Section */}
       <section id="about" className="py-20 px-6" ref={aboutRef}>
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -1211,8 +748,7 @@ export default function Portfolio() {
               <h2 className="text-4xl font-bold text-white mb-6">About SoftHub</h2>
               <p className="text-white/80 text-lg mb-6">
                 We are a team of passionate developers and cybersecurity experts dedicated to creating secure,
-                innovative digital solutions. With years of experience in the industry, we understand the critical
-                importance of both functionality and security in today&apos;s digital landscape.
+                innovative digital solutions.
               </p>
               <p className="text-white/80 text-lg mb-8">
                 Our mission is to help businesses thrive in the digital age by providing robust, scalable, and secure
@@ -1221,15 +757,15 @@ export default function Portfolio() {
               <div className="grid grid-cols-3 gap-6">
                 <div className="stat-item text-center">
                   <div className="stat-number text-3xl font-bold text-cyan-400 mb-2">50+</div>
-                  <div className="stat-label text-white/70">Projects Completed</div>
+                  <div className="text-white/70">Projects Completed</div>
                 </div>
                 <div className="stat-item text-center">
                   <div className="stat-number text-3xl font-bold text-purple-400 mb-2">5+</div>
-                  <div className="stat-label text-white/70">Years Experience</div>
+                  <div className="text-white/70">Years Experience</div>
                 </div>
                 <div className="stat-item text-center">
                   <div className="stat-number text-3xl font-bold text-green-400 mb-2">100%</div>
-                  <div className="stat-label text-white/70">Client Satisfaction</div>
+                  <div className="text-white/70">Client Satisfaction</div>
                 </div>
               </div>
             </div>
@@ -1261,11 +797,11 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Contact Section - Enhanced with 3D */}
+      {/* Contact Section */}
       <section id="contact" className="py-20 px-6 bg-black/20" ref={contactRef}>
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Let&apos;s Work Together</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Let's Work Together</h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Ready to secure and scale your digital presence? Get in touch with us today.
             </p>
@@ -1303,69 +839,120 @@ export default function Portfolio() {
                 </div>
               </div>
               <div className="flex space-x-4 mt-8">
-                <CustomButton
-                  size="icon"
-                  variant="outline"
-                  className="social-btn border-white/20 text-white hover:bg-white/10 bg-transparent"
-                >
+                <CustomButton size="icon" variant="outline" onClick={() => window.open('#', '_blank')} aria-label="GitHub">
                   <Github className="w-5 h-5" />
                 </CustomButton>
-                <CustomButton
-                  size="icon"
-                  variant="outline"
-                  className="social-btn border-white/20 text-white hover:bg-white/10 bg-transparent"
-                >
+                <CustomButton size="icon" variant="outline" onClick={() => window.open('#', '_blank')} aria-label="LinkedIn">
                   <Linkedin className="w-5 h-5" />
                 </CustomButton>
-                <CustomButton
-                  size="icon"
-                  variant="outline"
-                  className="social-btn border-white/20 text-white hover:bg-white/10 bg-transparent"
-                >
+                <CustomButton size="icon" variant="outline" onClick={() => window.open('#', '_blank')} aria-label="Twitter / X">
                   <Twitter className="w-5 h-5" />
                 </CustomButton>
               </div>
             </div>
-            <CustomCard className="contact-form bg-white/5 border-white/10 backdrop-blur-sm">
+
+            <CustomCard className="contact-form">
               <CustomCardHeader>
                 <CustomCardTitle className="text-white">Send us a message</CustomCardTitle>
+                <CustomCardDescription>We’ll reply within 1–2 business days.</CustomCardDescription>
               </CustomCardHeader>
               <CustomCardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-white/80 text-sm">First Name</label>
-                    <input
-                      className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
-                      placeholder="John"
-                    />
+                <form action={action} className="space-y-4" aria-describedby="form-status">
+                  {/* Honeypot */}
+                  <input type="text" name="hp" className="hidden" tabIndex={-1} autoComplete="off" />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="firstName" className="text-white/90 text-sm">First Name</label>
+                      <input
+                        id="firstName"
+                        name="firstName"
+                        required
+                        className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
+                        placeholder="John"
+                        aria-invalid={!!state?.errors?.firstName}
+                        aria-describedby={state?.errors?.firstName ? "firstName-error" : undefined}
+                      />
+                      {state?.errors?.firstName && (
+                        <p id="firstName-error" className="mt-1 text-xs text-red-300">{state.errors.firstName}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="lastName" className="text-white/90 text-sm">Last Name</label>
+                      <input
+                        id="lastName"
+                        name="lastName"
+                        required
+                        className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
+                        placeholder="Doe"
+                        aria-invalid={!!state?.errors?.lastName}
+                        aria-describedby={state?.errors?.lastName ? "lastName-error" : undefined}
+                      />
+                      {state?.errors?.lastName && (
+                        <p id="lastName-error" className="mt-1 text-xs text-red-300">{state.errors.lastName}</p>
+                      )}
+                    </div>
                   </div>
+
                   <div>
-                    <label className="text-white/80 text-sm">Last Name</label>
+                    <label htmlFor="email" className="text-white/90 text-sm">Email</label>
                     <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
                       className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
-                      placeholder="Doe"
+                      placeholder="john@example.com"
+                      aria-invalid={!!state?.errors?.email}
+                      aria-describedby={state?.errors?.email ? "email-error" : undefined}
                     />
+                    {state?.errors?.email && (
+                      <p id="email-error" className="mt-1 text-xs text-red-300">{state.errors.email}</p>
+                    )}
                   </div>
-                </div>
-                <div>
-                  <label className="text-white/80 text-sm">Email</label>
-                  <input
-                    type="email"
-                    className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
-                    placeholder="john@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="text-white/80 text-sm">Message</label>
-                  <textarea
-                    rows={4}
-                    className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
-                    placeholder="Tell us about your project..."
-                  ></textarea>
-                </div>
-                <CustomButton className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white border-0">
-                  Send Message
-                </CustomButton>
+
+                  <div>
+                    <label htmlFor="plan" className="text-white/90 text-sm">Plan</label>
+                    <select
+                      id="plan"
+                      name="plan"
+                      ref={planSelectRef}
+                      className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white"
+                      defaultValue=""
+                    >
+                      <option value="">General Inquiry</option>
+                      {pricingPlans.map(p => (
+                        <option key={p.name} value={p.name}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="message" className="text-white/90 text-sm">Message</label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      required
+                      minLength={10}
+                      className="form-input w-full mt-1 px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50"
+                      placeholder="Tell us about your project..."
+                      aria-invalid={!!state?.errors?.message}
+                      aria-describedby={state?.errors?.message ? "message-error" : undefined}
+                    ></textarea>
+                    {state?.errors?.message && (
+                      <p id="message-error" className="mt-1 text-xs text-red-300">{state.errors.message}</p>
+                    )}
+                  </div>
+
+                  <CustomButton type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? "Sending..." : "Send Message"}
+                  </CustomButton>
+
+                  <div id="form-status" className={`text-sm mt-2 ${state?.ok ? "text-green-300" : "text-white/80"}`} aria-live="polite">
+                    {state?.message}
+                  </div>
+                </form>
               </CustomCardContent>
             </CustomCard>
           </div>
@@ -1378,7 +965,7 @@ export default function Portfolio() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
-                <SoftHubLogo size={32} className="w-8 h-8" />
+                <Code className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-white">SoftHub</span>
             </div>
@@ -1386,6 +973,15 @@ export default function Portfolio() {
           </div>
         </div>
       </footer>
+
+      {/* Success flash overlay */}
+      {successFlash && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60]">
+          <div className="rounded-lg bg-emerald-500/90 text-white px-4 py-2 shadow-lg">
+            Message sent successfully!
+          </div>
+        </div>
+      )}
     </div>
   )
 }
