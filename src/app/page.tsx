@@ -13,7 +13,7 @@ import { useActionState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { TextPlugin } from "gsap/TextPlugin"
-import { Shield, Globe, Smartphone, Code, Server, Database, Zap, ArrowRight, Mail, Phone, MapPin, Github, Linkedin, Twitter, CheckCircle } from 'lucide-react'
+import { Shield, Globe, Smartphone, Code, Server, Database, Zap, ArrowRight, Mail, Phone, MapPin, Github, Linkedin, CheckCircle, PhoneCall } from 'lucide-react'
 import { sendContactEmail, type ContactState } from "./actions/send-emails"
 
 // Register GSAP plugins
@@ -272,7 +272,173 @@ export default function Portfolio() {
           }
         })
       }
+      // Contact Section - 3D Card Flip and Form Animation
+      if (contactRef.current) {
+        const contactInfo = contactRef.current.querySelector(".contact-info")
+        const contactForm = contactRef.current.querySelector(".contact-form")
+        const contactItems = contactRef.current.querySelectorAll(".contact-item")
+        const formInputs = contactRef.current.querySelectorAll(".form-input")
+        const socialButtons = contactRef.current.querySelectorAll(".social-btn")
 
+        // Contact info 3D entrance
+        gsap.fromTo(
+          contactInfo,
+          {
+            opacity: 0,
+            rotationY: -90,
+            x: -100,
+            transformPerspective: 1000,
+          },
+          {
+            opacity: 1,
+            rotationY: 0,
+            x: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: contactRef.current,
+              start: "top 75%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        )
+
+        // Contact form 3D entrance
+        gsap.fromTo(
+          contactForm,
+          {
+            opacity: 0,
+            rotationY: 90,
+            x: 100,
+            transformPerspective: 1000,
+          },
+          {
+            opacity: 1,
+            rotationY: 0,
+            x: 0,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: contactRef.current,
+              start: "top 75%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        )
+
+        // Contact items staggered animation
+        gsap.fromTo(
+          contactItems,
+          {
+            opacity: 0,
+            rotationX: 45,
+            y: 30,
+            transformPerspective: 1000,
+          },
+          {
+            opacity: 1,
+            rotationX: 0,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: contactInfo,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        )
+
+        // Form inputs 3D animation
+        gsap.fromTo(
+          formInputs,
+          {
+            opacity: 0,
+            rotationX: 90,
+            y: 20,
+            transformPerspective: 1000,
+          },
+          {
+            opacity: 1,
+            rotationX: 0,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: contactForm,
+              start: "top 80%",
+              toggleActions: "play none none reverse",
+            },
+          },
+        )
+
+        // Social buttons 3D hover effects
+        socialButtons.forEach((btn, index) => {
+          gsap.set(btn, {
+            transformPerspective: 1000,
+            transformStyle: "preserve-3d",
+          })
+
+          // Continuous subtle rotation
+          gsap.to(btn, {
+            rotationY: Math.sin(index) * 5,
+            rotationX: Math.cos(index) * 3,
+            duration: 3 + Math.random(),
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: index * 0.2,
+          })
+
+          btn.addEventListener("mouseenter", () => {
+            gsap.to(btn, {
+              scale: 1.2,
+              rotationY: 180,
+              rotationX: 10,
+              z: 20,
+              duration: 0.6,
+              ease: "back.out(1.7)",
+            })
+          })
+
+          btn.addEventListener("mouseleave", () => {
+            gsap.to(btn, {
+              scale: 1,
+              rotationY: 0,
+              rotationX: 0,
+              z: 0,
+              duration: 0.4,
+              ease: "power2.out",
+            })
+          })
+        })
+
+        // Form input focus effects
+        formInputs.forEach((input) => {
+          input.addEventListener("focus", () => {
+            gsap.to(input, {
+              scale: 1.02,
+              rotationX: -2,
+              z: 5,
+              duration: 0.3,
+              ease: "power2.out",
+            })
+          })
+
+          input.addEventListener("blur", () => {
+            gsap.to(input, {
+              scale: 1,
+              rotationX: 0,
+              z: 0,
+              duration: 0.3,
+              ease: "power2.out",
+            })
+          })
+        })
+      }
+      
       if (pricingRef.current) {
         const cards = pricingRef.current.querySelectorAll(".pricing-card")
         const features = pricingRef.current.querySelectorAll(".pricing-feature")
@@ -459,7 +625,7 @@ export default function Portfolio() {
       <nav className="fixed top-0 w-full bg-black/20 backdrop-blur-md z-50 border-b border-white/10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div onClick={() => {window.location.hash = "";window.location.hash = "hero"}} className="flex items-center space-x-2 cursor-pointer" >
               <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
                 <Code className="w-5 h-5 text-white" />
               </div>
@@ -484,7 +650,7 @@ export default function Portfolio() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="pt-32 pb-20 px-6" id="hero">
         <div className="container mx-auto text-center">
           <div>
             <h1 ref={titleRef} className="text-5xl md:text-7xl font-bold text-white mb-6 opacity-0">
@@ -801,7 +967,7 @@ export default function Portfolio() {
       <section id="contact" className="py-20 px-6 bg-black/20" ref={contactRef}>
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Let's Work Together</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Let&apos;s Work Together</h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Ready to secure and scale your digital presence? Get in touch with us today.
             </p>
@@ -839,14 +1005,14 @@ export default function Portfolio() {
                 </div>
               </div>
               <div className="flex space-x-4 mt-8">
-                <CustomButton size="icon" variant="outline" onClick={() => window.open('#', '_blank')} aria-label="GitHub">
-                  <Github className="w-5 h-5" />
+                <CustomButton size="icon" variant="outline" onClick={() => window.open('https://github.com/essayeswajih', '_blank')} aria-label="GitHub">
+                  <Github className="w-5 h-5 cursor-pointer" />
                 </CustomButton>
-                <CustomButton size="icon" variant="outline" onClick={() => window.open('#', '_blank')} aria-label="LinkedIn">
-                  <Linkedin className="w-5 h-5" />
+                <CustomButton size="icon" variant="outline" onClick={() => window.open('https://www.linkedin.com/in/essayes-wajih/', '_blank')} aria-label="LinkedIn">
+                  <Linkedin className="w-5 h-5 cursor-pointer" />
                 </CustomButton>
-                <CustomButton size="icon" variant="outline" onClick={() => window.open('#', '_blank')} aria-label="Twitter / X">
-                  <Twitter className="w-5 h-5" />
+                <CustomButton size="icon" variant="outline" onClick={() => window.open('https://wa.me/21627553981', 'Whatsapp')} aria-label="Twitter / X">
+                  <PhoneCall className="w-5 h-5 cursor-pointer" />
                 </CustomButton>
               </div>
             </div>
@@ -963,7 +1129,7 @@ export default function Portfolio() {
       <footer className="py-8 px-6 border-t border-white/10">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+            <div onClick={() => {window.location.hash = "";window.location.hash = "hero"}} className="flex items-center space-x-2 mb-4 md:mb-0 cursor-pointer">
               <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
                 <Code className="w-5 h-5 text-white" />
               </div>
