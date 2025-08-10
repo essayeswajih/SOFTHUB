@@ -1005,13 +1005,13 @@ export default function Portfolio() {
                 </div>
               </div>
               <div className="flex space-x-4 mt-8">
-                <CustomButton size="icon" variant="outline" onClick={() => window.open('https://github.com/essayeswajih', '_blank')} aria-label="GitHub">
+                <CustomButton size="icon" variant="outline" onClick={() => window.open("https://github.com/essayeswajih", "_blank")} aria-label="GitHub">
                   <Github className="w-5 h-5 cursor-pointer" />
                 </CustomButton>
-                <CustomButton size="icon" variant="outline" onClick={() => window.open('https://www.linkedin.com/in/essayes-wajih/', '_blank')} aria-label="LinkedIn">
+                <CustomButton size="icon" variant="outline" onClick={() => window.open("https://www.linkedin.com/in/essayes-wajih/", "_blank")} aria-label="LinkedIn">
                   <Linkedin className="w-5 h-5 cursor-pointer" />
                 </CustomButton>
-                <CustomButton size="icon" variant="outline" onClick={() => window.open('https://wa.me/21627553981', 'Whatsapp')} aria-label="Twitter / X">
+                <CustomButton size="icon" variant="outline" onClick={() => window.open("https://wa.me/21627553981", "Whatsapp")} aria-label="Whatsapp">
                   <PhoneCall className="w-5 h-5 cursor-pointer" />
                 </CustomButton>
               </div>
